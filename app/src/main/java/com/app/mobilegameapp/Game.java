@@ -2,6 +2,8 @@ package com.app.mobilegameapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,24 +16,29 @@ import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Game extends AppCompatActivity implements SensorEventListener {
 
     // experimental values for hi and lo magnitude limits
-    private final double XUp = 6.0;     // upper mag limit
-    private final double XUpB = 4.0;
+    private final double XUp = 4.0;     // upper mag limit
+    private final double XUpB = 3.0;
 
-    private final double XDown = -3.0;     // upper mag limit
-    private final double XDownB = 1.0;
+    private final double XDown = -2.0;     // upper mag limit
+    private final double XDownB = 0.0;
 
 
-    private final double YRight = 6.0;
-    private final double YRightB = 4.0;
+    private final double YRight = 4.0;
+    private final double YRightB = 3.0;
 
-    private final double YLeft = -6.0;
-    private final double YLeftB = -4.0;// lower mag limit
+    private final double YLeft = -2.0;
+    private final double YLeftB = -0.0;// lower mag limit
     boolean highLimitU = false;
     boolean highLimitD = false;
     boolean highLimitL = false;
@@ -42,37 +49,35 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     int XDownCount = 0;
     int lCount = 0;
     int rCount = 0;
+    RelativeLayout layout;
 
     //Game varibles //
-    int roundCounter = 1;
-    int guessCount = 0;
-    int roundTime = 6000;
+    int roundCounter = 1, guessCount = 0, roundTime = 1500, CPUSets = 2, listCounter = 0;
+    boolean hardMode = true, haveAddedNew = false, firstRound = true;
 
 
-    TextView tvx, tvy, tvz, tvUp, tvLeft, tvRight, tvDown, gameText, tvRound;
+
+    TextView tvy, tvz, tvUp, tvLeft, tvRight, tvDown, gameText, tvRound;
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
     //buttons
-    private final int RED = 1;
-    private final int BLUE = 2;
-
-    private final int YELLOW = 3;
-    private final int GREEN = 4;
+    private final int RED = 1, BLUE = 2, YELLOW = 3, GREEN = 4;
 
     Animation anim;
 
     StringBuilder sb;
-    Button bRed, bBlue, bYellow, bGreen;
-    TextView tv;
+    Button bRed, bBlue, bYellow, bGreen, play;
+
 
     int sequenceCount = 4, n = 0;
-    int[] gameSequence = new int[120];
+    //int[] gameSequence = new int[120];
+    List<Integer> gameSequence = new ArrayList<>();
     int arrayIndex = 0;
 
-    public void test(int num1, int num2)
+    public void test(int num)
     {
-        CountDownTimer ct = new CountDownTimer(num1,  num2) {
+        CountDownTimer ct = new CountDownTimer(num,  1500) {
 
             public void onTick(long millisUntilFinished) {
                 //mTextField.setText("seconds remaining: " + millisUntilFinished / 1500);
@@ -86,7 +91,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
                 gameText.setText(sb);
                 for (int i = 0; i< arrayIndex; i++)
-                    Log.d("game sequence", String.valueOf(gameSequence[i]));
+                    Log.d("game sequence", String.valueOf(gameSequence.get(i)));
                 // start next activity
                 gameStarted = true;
                 // put the sequence into the next activity
@@ -115,22 +120,18 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         getSupportActionBar().hide();
 
 
-        tvx = findViewById(R.id.tvX);
+
         tvy = findViewById(R.id.tvY);
-        tvz = findViewById(R.id.tvZ);
-        tvUp = findViewById(R.id.tvSteps);
-        tvDown = findViewById(R.id.down);
-        tvLeft = findViewById(R.id.left);
-        tvRight = findViewById(R.id.right);
+
 
         bRed = findViewById(R.id.btnRed);
         bBlue = findViewById(R.id.btnBlue);
         bYellow = findViewById(R.id.btnYellow);
         bGreen = findViewById(R.id.btnGreen);
+        play = findViewById(R.id.btnPlay);
 
         gameText = findViewById(R.id.tvGame);
         tvRound = findViewById(R.id.tvRound);
-
 
 
         // we are going to use the sensor service
@@ -144,69 +145,147 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         if (gameStarted == false)
         {
-            n = getRandom(sequenceCount);
-            sb.append(String.valueOf(n) + ", ");
+
+
+            if (hardMode == true)
+            {
+                n = getRandom(sequenceCount);
+                sb.append(String.valueOf(n) + ", ");
+
+            }
+
+            else
+            {
+                if (firstRound)
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        gameSequence.add(getRandom(sequenceCount));
+                        sb.append(String.valueOf(n) + ", ");
+
+                    }
+
+                }
+
+                else
+                {
+                    if(haveAddedNew == false)
+                    {
+                        gameSequence.add(getRandom(sequenceCount));
+                        haveAddedNew = true;
+                        sb.append(String.valueOf(n) + ", ");
+                    }
+
+                }
+
+
+                n = gameSequence.get(listCounter);
+                listCounter++;
+            }
          //   Toast.makeText(this, "Number = " + n, Toast.LENGTH_SHORT).show();
 
             switch (n) {
                 case 1:
                     flashButton(bRed);
-                    gameSequence[arrayIndex++] = BLUE;
+                    gameSequence.add(RED);
                     break;
                 case 2:
                     flashButton(bBlue);
-                    gameSequence[arrayIndex++] = RED;
+                    gameSequence.add(BLUE);
                     break;
                 case 3:
                     flashButton(bYellow);
-                    gameSequence[arrayIndex++] = YELLOW;
+                    gameSequence.add(YELLOW);
                     break;
                 case 4:
                     flashButton(bGreen);
-                    gameSequence[arrayIndex++] = GREEN;
+                    gameSequence.add(GREEN);
                     break;
                 default:
                     break;
             }   // end switch
 
         }
-        if(gameStarted == true && guessCount <= sequenceCount)
+        if(gameStarted == true && guessCount < CPUSets)
         {
+            sb.delete(0, sb.length());
 
-            switch (num) {
-                case 1:
-                    flashButton(bRed);
-                    guessCount++;
-                   // gameSequence[arrayIndex++] = BLUE;
-                    break;
-                case 2:
-                    flashButton(bBlue);
-                    guessCount++;
-                  //  gameSequence[arrayIndex++] = RED;
-                    break;
-                case 3:
-                    flashButton(bYellow);
-                    guessCount++;
-                  //  gameSequence[arrayIndex++] = YELLOW;
-                    break;
-                case 4:
-                    flashButton(bGreen);
-                    guessCount++;
-                  //  gameSequence[arrayIndex++] = GREEN;
-                    break;
-                default:
-                    break;
+
+//            int arraySize = gameSequence.size();
+//            for(int i = 0; i < arraySize; i++) {
+//                tvz.append(String.valueOf(gameSequence.get(i)));
+//            }
+
+            if(num != gameSequence.get(guessCount))
+            {
+                GameOver();
+
             }
 
-            tvRound.setText(String.valueOf(guessCount));
+            else
+            {
+                switch (num) {
+                    case 1:
+                        flashButton(bRed);
+                        guessCount++;
+                        // gameSequence[arrayIndex++] = BLUE;
+                        break;
+                    case 2:
+                        flashButton(bBlue);
+                        guessCount++;
+                        //  gameSequence[arrayIndex++] = RED;
+                        break;
+                    case 3:
+                        flashButton(bYellow);
+                        guessCount++;
+                        //  gameSequence[arrayIndex++] = YELLOW;
+                        break;
+                    case 4:
+                        flashButton(bGreen);
+                        guessCount++;
+                        //  gameSequence[arrayIndex++] = GREEN;
+                        break;
+                    default:
+                        break;
+                }
+
+                tvRound.setText(String.valueOf(guessCount));
+
+                if (guessCount == CPUSets)
+                {
+                    //nextRound///
+                    gameStarted = false;
+                   // gameSequence = new int[120];
+
+                    CPUSets++;
+                    guessCount = 0;
+                    tvRound.setText("Game Over");
+                    play.setVisibility(View.VISIBLE);
+                    play.setText("Next Round");
+                    listCounter = 0;
+
+                    if(hardMode == true)
+                    {
+                        gameSequence.removeAll(gameSequence) ;
+
+                    }
+
+                }
+
+            }
+
+
+
         }
-        else
-           {
-               tvRound.setText("Game Over");
-              // nextRound();
 
 
-           }
+    }
+    public void GameOver()
+    {
+        Intent i = (new Intent(Game.this, ScoreBoard.class));
+//             i.putExtra("distance", disText);
+//               i.putExtra("calories", calText);
+        startActivity(i);
 
     }
 
@@ -239,14 +318,15 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
     public void doPlay(View view) {
         sb = new StringBuilder("Result : ");
-     //   ct.start();
-        test(6000, 1500);
+        play.setVisibility(View.GONE);
+        roundTime += 1500;
+        test(roundTime);
        // ct.set
     }
 
     public void nextRound() {
         roundTime += 1500;
-        test(roundTime, 1500);
+        test(roundTime);
 
     }
 
@@ -282,9 +362,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             float y = event.values[1];
             float z = event.values[2];
 
-            tvx.setText(String.valueOf(x));
-            tvy.setText(String.valueOf(y));
-            tvz.setText(String.valueOf(z));
+
+
 
             if ((x > XUp) && (highLimitU == false)) {
                 highLimitU = true;
@@ -292,7 +371,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             if ((x < XUpB) && (highLimitU == true)) {
                 // we have a tilt to the north
                 XUpCount++;
-                tvUp.setText(String.valueOf(XUpCount));
+
                 oneButton(1);
                 highLimitU = false;
             }
@@ -303,7 +382,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             if ((x > XDownB) && (highLimitD == true)) {
                 // we have a tilt to the north
                 XDownCount++;
-                tvDown.setText(String.valueOf(XDownCount));
+
                 oneButton(3);
                 highLimitD = false;
             }
@@ -315,7 +394,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             if ((y > YLeftB) && (highLimitL == true)) {
                 // we have a tilt to the north
                 lCount++;
-                tvLeft.setText(String.valueOf(lCount));
+
                 oneButton(4);
                 highLimitL = false;
             }
@@ -328,7 +407,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             if ((y < YRightB) && (highLimitR == true)) {
                 // we have a tilt to the north
                 rCount++;
-                tvRight.setText(String.valueOf(rCount));
+
                 oneButton(2);
                 highLimitR = false;
             }
