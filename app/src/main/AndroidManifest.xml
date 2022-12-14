@@ -13,8 +13,16 @@
         android:theme="@style/Theme.MobileGameApp"
         tools:targetApi="31">
         <activity
-            android:name=".ScoreBoard"
+            android:name=".Scores"
             android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".ScoreBoard"
+            android:exported="false"
+            android:theme="@style/ListFont">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -23,11 +31,9 @@
             android:name=".Game"
             android:exported="false"
             android:screenOrientation="landscape">
-
             <meta-data
                 android:name="android.app.lib_name"
-                android:value=""
-                />
+                android:value="" />
         </activity>
         <activity
             android:name=".MainActivity"

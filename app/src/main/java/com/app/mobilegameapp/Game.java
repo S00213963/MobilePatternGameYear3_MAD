@@ -49,7 +49,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     int XDownCount = 0;
     int lCount = 0;
     int rCount = 0;
-    RelativeLayout layout;
+
 
     //Game varibles //
     int roundCounter = 1, guessCount = 0, roundTime = 1500, CPUSets = 2, listCounter = 0;
@@ -282,9 +282,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     }
     public void GameOver()
     {
-        Intent i = (new Intent(Game.this, ScoreBoard.class));
-//             i.putExtra("distance", disText);
-//               i.putExtra("calories", calText);
+        Intent i = (new Intent(Game.this, Scores.class));
         startActivity(i);
 
     }
