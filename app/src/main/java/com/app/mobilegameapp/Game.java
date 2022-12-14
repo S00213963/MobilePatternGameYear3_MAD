@@ -12,13 +12,28 @@ import android.widget.TextView;
 public class Game extends AppCompatActivity implements SensorEventListener {
 
     // experimental values for hi and lo magnitude limits
-    private final double NORTH_MOVE_FORWARD = 9.0;     // upper mag limit
-    private final double NORTH_MOVE_BACKWARD = 6.0;      // lower mag limit
-    boolean highLimit = false;      // detect high limit
-    int counter = 0;
-    int sCount = 0;// step counter
+    private final double XUp = 6.0;     // upper mag limit
+    private final double XUpB = 4.0;
 
-    TextView tvx, tvy, tvz, tvNorth, tvSouth;
+    private final double XDown = -3.0;     // upper mag limit
+    private final double XDownB = 1.0;
+
+
+    private final double YRight = 6.0;
+    private final double YRightB = 4.0;
+
+    private final double YLeft = -6.0;
+    private final double YLeftB = -4.0;// lower mag limit
+    boolean highLimitU = false;
+    boolean highLimitD = false;
+    boolean highLimitL = false;
+    boolean highLimitR = false;
+    int XUpCount = 0;
+    int XDownCount = 0;
+    int lCount = 0;
+    int rCount = 0;
+
+    TextView tvx, tvy, tvz, tvUp, tvLeft, tvRight, tvDown;
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
@@ -32,8 +47,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         tvx = findViewById(R.id.tvX);
         tvy = findViewById(R.id.tvY);
         tvz = findViewById(R.id.tvZ);
-        tvNorth = findViewById(R.id.tvSteps);
-        tvSouth = findViewById(R.id.southCount);
+        tvUp = findViewById(R.id.tvSteps);
+        tvDown = findViewById(R.id.down);
+        tvLeft = findViewById(R.id.left);
+        tvRight = findViewById(R.id.right);
 
         // we are going to use the sensor service
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -71,28 +88,50 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         tvy.setText(String.valueOf(y));
         tvz.setText(String.valueOf(z));
 
-
-        // Can we get a north movement
-        // you need to do your own mag calculating
-        if ((x > NORTH_MOVE_FORWARD) && (highLimit == false)) {
-            highLimit = true;
+        if ((x > XUp) && (highLimitU == false)) {
+            highLimitU = true;
         }
-        if ((x < NORTH_MOVE_BACKWARD) && (highLimit == true)) {
+        if ((x < XUpB) && (highLimitU == true)) {
             // we have a tilt to the north
-            counter++;
-            tvNorth.setText(String.valueOf(counter));
-            highLimit = false;
+            XUpCount++;
+            tvUp.setText(String.valueOf(XUpCount));
+            highLimitU = false;
         }
 
-        if ((x < NORTH_MOVE_FORWARD) && (highLimit == false)) {
-            highLimit = true;
+        if ((x < XDown) && (highLimitD == false)) {
+            highLimitD = true;
         }
-        if ((x > NORTH_MOVE_BACKWARD) && (highLimit == true)) {
+        if ((x > XDownB) && (highLimitD == true)) {
             // we have a tilt to the north
-            sCount++;
-            tvSouth.setText(String.valueOf(counter));
-            highLimit = false;
+            XDownCount++;
+            tvDown.setText(String.valueOf(XDownCount));
+            highLimitD = false;
         }
+
+
+        if ((y < YLeft) && (highLimitL == false)) {
+            highLimitL = true;
+        }
+        if ((y > YLeftB) && (highLimitL == true)) {
+            // we have a tilt to the north
+            lCount++;
+            tvLeft.setText(String.valueOf(lCount));
+            highLimitL = false;
+        }
+
+
+
+        if ((y > YRight) && (highLimitR == false)) {
+            highLimitR = true;
+        }
+        if ((y < YRightB) && (highLimitR == true)) {
+            // we have a tilt to the north
+            rCount++;
+            tvRight.setText(String.valueOf(rCount));
+            highLimitR = false;
+        }
+
+
     }
 
     @Override
