@@ -12,12 +12,20 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends Activity  implements SensorEventListener,
+        AdapterView.OnItemSelectedListener  {
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private long lastUpdate;
@@ -26,6 +34,12 @@ public class MainActivity extends Activity implements SensorEventListener {
     ShapeDrawable mDrawable = new ShapeDrawable();
     public static int x;
     public static int y;
+    Spinner spinner;
+    String selectedMode, sel;
+    TextView detail;
+    EditText etName;
+    Integer modeNum;
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +51,74 @@ public class MainActivity extends Activity implements SensorEventListener {
                 .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         lastUpdate = System.currentTimeMillis();
 
+        spinner = findViewById(R.id.spinner);
+        detail = findViewById(R.id.tvDetail);
+        etName = findViewById(R.id.etName);
+
+        ArrayAdapter adapter = ArrayAdapter.createFromResource(this,
+                R.array.spinnerItems, R.layout.spinner);
+       adapter.setDropDownViewResource(R.layout.spinner_background);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+
 
     }
 
     @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+        sel = adapterView.getItemAtPosition(i).toString();
+       modeNum = i;
+        detail.setText(sel);
+        if(i == 0)
+        {
+            detail.setText("One color is added to the sequence every round");
+            selectedMode = "Easy";
+
+        }
+        else if(i == 1)
+        {
+            detail.setText("The sequence changes every round, increasing the length by 1 extra color");
+            selectedMode = "Hard";
+        }
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+    public void GameStart(View V)
+    {   String n = etName.getText().toString();
+
+        if(n.matches("Name"))
+        {
+            Toast.makeText(this, "Please Enter You Name",
+                    Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            mp = MediaPlayer.create(this, R.raw.start);
+            mp.start();
+
+            Intent i = (new Intent(MainActivity.this, Game.class));
+            i.putExtra("name", n);
+            i.putExtra("mode", sel );
+            i.putExtra("modeNum", modeNum.toString());
+            startActivity(i);
+//        animatedView = new AnimatedView(this);
+//        setContentView(animatedView);
+
+        }
+
+
+
+    }
+
+
+
+        @Override
     protected void onResume() {
         super.onResume();
         sensorManager.registerListener(this, accelerometer,
@@ -77,6 +155,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
 
+
+
     public class AnimatedView extends androidx.appcompat.widget.AppCompatImageView {
 
         static final int width = 150;
@@ -101,17 +181,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
 
-    public void GameStart(View V)
-    {
-        Intent i = (new Intent(MainActivity.this, Game.class));
-//        i.putExtra("distance", disText);
-//        i.putExtra("calories", calText);
-        startActivity(i);
-//        animatedView = new AnimatedView(this);
-//        setContentView(animatedView);
 
-
-    }
 
 }
 

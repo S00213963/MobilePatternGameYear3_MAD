@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -23,46 +24,45 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Game extends AppCompatActivity implements SensorEventListener {
 
     // experimental values for hi and lo magnitude limits
-    private final double XUp = 4.0;     // upper mag limit
-    private final double XUpB = 3.0;
+    private final double XUp = 8.0;     // upper mag limit
+    private final double XUpB = 6.0;
 
-    private final double XDown = -2.0;     // upper mag limit
-    private final double XDownB = 0.0;
+    private final double XDown = -4.0;     // upper mag limit
+    private final double XDownB = -2.0;
 
 
-    private final double YRight = 4.0;
-    private final double YRightB = 3.0;
+    private final double YRight = 8.0;
+    private final double YRightB = 6.0;
 
-    private final double YLeft = -2.0;
-    private final double YLeftB = -0.0;// lower mag limit
+    private final double YLeft = -4.0;
+    private final double YLeftB = -2.0;// lower mag limit
     boolean highLimitU = false;
     boolean highLimitD = false;
     boolean highLimitL = false;
     boolean highLimitR = false;
 
     boolean gameStarted = false;
-    int XUpCount = 0;
-    int XDownCount = 0;
-    int lCount = 0;
-    int rCount = 0;
+
 
 
     //Game varibles //
-    int roundCounter = 1, guessCount = 0, roundTime = 1500, CPUSets = 2, listCounter = 0;
+    int rCounter = 0, guessCount = 0, roundTime = 1500, CPUSets = 2, listCounter = 0;
     boolean hardMode = true, haveAddedNew = false, firstRound = true;
 
 
 
-    TextView tvy, tvz, tvUp, tvLeft, tvRight, tvDown, gameText, tvRound;
+    TextView tvy, gameText;
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
     //buttons
-    private final int RED = 1, BLUE = 2, YELLOW = 3, GREEN = 4;
+    private final int RED = 1, BLUE = 2, PURPLE = 3, GREEN = 4;
 
     Animation anim;
 
@@ -75,39 +75,41 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     List<Integer> gameSequence = new ArrayList<>();
     int arrayIndex = 0;
 
-    public void test(int num)
+    String name, mode, modeNum;
+    TextView tvMode, tvRoundMess, tvRound, tvPoints;
+    int points = 0;
+    MediaPlayer mp;
+
+    CountUpTimer timer;
+
+    boolean first = true, timeBonus = false;
+    int secondCount = 0;
+
+
+
+    public void start(int num) // added time so it picks extra color every round
     {
         CountDownTimer ct = new CountDownTimer(num,  1500) {
 
             public void onTick(long millisUntilFinished) {
-                //mTextField.setText("seconds remaining: " + millisUntilFinished / 1500);
+
                 oneButton(0);
-                //here you can have your logic to set text to edittext
+
             }
 
             public void onFinish() {
-                //mTextField.setText("done!");
-                // we now have the game sequence
+
 
                 gameText.setText(sb);
                 for (int i = 0; i< arrayIndex; i++)
                     Log.d("game sequence", String.valueOf(gameSequence.get(i)));
-                // start next activity
-                gameStarted = true;
-                // put the sequence into the next activity
-                // stack overglow https://stackoverflow.com/questions/3848148/sending-arrays-with-intent-putextra
-                //Intent i = new Intent(A.this, B.class);
-                //i.putExtra("numbers", array);
-                //startActivity(i);
 
-                // start the next activity
-                // int[] arrayB = extras.getIntArray("numbers");
+                gameStarted = true;
+
             }
         };
 
         ct.start();
-
-
 
     }
 
@@ -119,11 +121,25 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         setContentView(R.layout.activity_game);
         getSupportActionBar().hide();
 
+        Bundle extras = getIntent().getExtras();
+        if(extras != null) // getting values from intent
+        {
+            name = extras.getString("name");
+            mode = extras.getString("mode");
+            modeNum = extras.getString("modeNum");
+        }
+
+        if(Integer.parseInt(modeNum) == 0)
+        {
+            hardMode = false;
+        }
+        else
+        {
+            hardMode = true;
+        }
 
 
         tvy = findViewById(R.id.tvY);
-
-
         bRed = findViewById(R.id.btnRed);
         bBlue = findViewById(R.id.btnBlue);
         bYellow = findViewById(R.id.btnYellow);
@@ -131,12 +147,27 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         play = findViewById(R.id.btnPlay);
 
         gameText = findViewById(R.id.tvGame);
-        tvRound = findViewById(R.id.tvRound);
+        tvRound = findViewById(R.id.TvRound);
+        tvRoundMess = findViewById(R.id.tvRound);
+        tvPoints = findViewById(R.id.tvPoints);
+        tvMode = findViewById(R.id.tvMode);
+
+        tvMode.setText(mode);
+        tvRound.setText(String.valueOf(rCounter));
+        tvPoints.setText(String.valueOf(points));
+
 
 
         // we are going to use the sensor service
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        timer = new CountUpTimer(300000) {  // should be high for the run (ms)
+            public void onTick(int second) {
+                secondCount = second;
+                tvRoundMess.setText("Time: " + String.valueOf(second));
+            }
+        };
 
 
     }
@@ -145,13 +176,12 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         if (gameStarted == false)
         {
-
+            tvRoundMess.setText("");
 
             if (hardMode == true)
             {
                 n = getRandom(sequenceCount);
                 sb.append(String.valueOf(n) + ", ");
-
             }
 
             else
@@ -164,7 +194,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                         sb.append(String.valueOf(n) + ", ");
 
                     }
-
                 }
 
                 else
@@ -182,24 +211,33 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 n = gameSequence.get(listCounter);
                 listCounter++;
             }
-         //   Toast.makeText(this, "Number = " + n, Toast.LENGTH_SHORT).show();
+
 
             switch (n) {
                 case 1:
                     flashButton(bRed);
                     gameSequence.add(RED);
+                    mp = MediaPlayer.create(this, R.raw.purple);
+                    mp.start();
+
                     break;
                 case 2:
                     flashButton(bBlue);
                     gameSequence.add(BLUE);
+                    mp = MediaPlayer.create(this, R.raw.blue);
+                    mp.start();
                     break;
                 case 3:
                     flashButton(bYellow);
-                    gameSequence.add(YELLOW);
+                    gameSequence.add(PURPLE);
+                    mp = MediaPlayer.create(this, R.raw.purple);
+                    mp.start();
                     break;
                 case 4:
                     flashButton(bGreen);
                     gameSequence.add(GREEN);
+                    mp = MediaPlayer.create(this, R.raw.green);
+                    mp.start();
                     break;
                 default:
                     break;
@@ -208,14 +246,13 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         }
         if(gameStarted == true && guessCount < CPUSets)
         {
+            timeBonus = false;
+            if(first)
+            {
+                timer.start();
+                first = false;
+            }
             sb.delete(0, sb.length());
-
-
-//            int arraySize = gameSequence.size();
-//            for(int i = 0; i < arraySize; i++) {
-//                tvz.append(String.valueOf(gameSequence.get(i)));
-//            }
-
             if(num != gameSequence.get(guessCount))
             {
                 GameOver();
@@ -228,45 +265,66 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     case 1:
                         flashButton(bRed);
                         guessCount++;
-                        // gameSequence[arrayIndex++] = BLUE;
+                        mp = MediaPlayer.create(this, R.raw.purple);
+                        mp.start();
                         break;
                     case 2:
                         flashButton(bBlue);
                         guessCount++;
-                        //  gameSequence[arrayIndex++] = RED;
+                        mp = MediaPlayer.create(this, R.raw.blue);
+                        mp.start();
                         break;
                     case 3:
                         flashButton(bYellow);
                         guessCount++;
-                        //  gameSequence[arrayIndex++] = YELLOW;
+                        mp = MediaPlayer.create(this, R.raw.purple);
+                        mp.start();
                         break;
                     case 4:
                         flashButton(bGreen);
                         guessCount++;
-                        //  gameSequence[arrayIndex++] = GREEN;
+                        mp = MediaPlayer.create(this, R.raw.green);
+                        mp.start();
                         break;
                     default:
                         break;
                 }
 
-                tvRound.setText(String.valueOf(guessCount));
+
 
                 if (guessCount == CPUSets)
                 {
-                    //nextRound///
+                    timer.cancel();
                     gameStarted = false;
-                   // gameSequence = new int[120];
 
-                    CPUSets++;
+                    CPUSets++; // number of colors CPU can pick increases by 1
                     guessCount = 0;
-                    tvRound.setText("Game Over");
+                    tvRoundMess.setText("Round Complete!");
                     play.setVisibility(View.VISIBLE);
                     play.setText("Next Round");
-                    listCounter = 0;
+                    points+= CalPoints();
+                    first = true; // starts timer for next round
+                    tvPoints.setText(String.valueOf(points));
+
+                    int delay = 1000; // delay for 5 sec.
+                    int period = 1000; // repeat every sec.
+                    int index = 0;
+
+                    if(timeBonus == true)
+                    {
+                        tvRoundMess.postDelayed(new Runnable() {
+                            public void run() {
+                                tvRoundMess.setText("Time Bonus added!!");}
+                        }, 1000);
+
+                    }
+
+
+                    listCounter = 0; //resets list count
 
                     if(hardMode == true)
                     {
-                        gameSequence.removeAll(gameSequence) ;
+                        gameSequence.removeAll(gameSequence) ; //if in hardmode, clear the list
 
                     }
 
@@ -277,11 +335,46 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
 
         }
+    }
+
+    public int CalPoints()
+    {
 
 
+        int points = 50;
+
+        if(secondCount <= CPUSets)
+        {
+            points += 25;
+            timeBonus = true;// if level is complete in less seconds the CPU selected colors,
+                          // player gets a points bonus
+
+        }
+
+        if(rCounter <= 2)
+        {
+            points += + 5* rCounter;
+
+        }
+        else if(rCounter > 2 && rCounter <=5)
+        {
+            points += 25 + 10* rCounter;
+
+        }
+
+        else if(rCounter > 5)
+        {
+            points += 50 + 20* rCounter;
+
+        }
+
+
+        return points;
     }
     public void GameOver()
     {
+        mp = MediaPlayer.create(this, R.raw.gameover);
+        mp.start();
         Intent i = (new Intent(Game.this, Scores.class));
         startActivity(i);
 
@@ -307,8 +400,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
     }
 
-    //
-    // return a number between 1 and maxValue
     private int getRandom(int maxValue) {
 
         return ((int) ((Math.random() * maxValue) + 1));
@@ -316,22 +407,15 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
     public void doPlay(View view) {
         sb = new StringBuilder("Result : ");
+
         play.setVisibility(View.GONE);
         roundTime += 1500;
-        test(roundTime);
-       // ct.set
-    }
-
-    public void nextRound() {
-        roundTime += 1500;
-        test(roundTime);
+        rCounter++;
+        tvRound.setText(String.valueOf(rCounter));
+        start(roundTime);
 
     }
 
-
-    /*
-     * When the app is brought to the foreground - using app on screen
-     */
     protected void onResume() {
         super.onResume();
         // turn on the sensor
@@ -368,7 +452,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             }
             if ((x < XUpB) && (highLimitU == true)) {
                 // we have a tilt to the north
-                XUpCount++;
+
 
                 oneButton(1);
                 highLimitU = false;
@@ -379,7 +463,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             }
             if ((x > XDownB) && (highLimitD == true)) {
                 // we have a tilt to the north
-                XDownCount++;
+
 
                 oneButton(3);
                 highLimitD = false;
@@ -391,7 +475,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             }
             if ((y > YLeftB) && (highLimitL == true)) {
                 // we have a tilt to the north
-                lCount++;
+
 
                 oneButton(4);
                 highLimitL = false;
@@ -404,7 +488,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             }
             if ((y < YRightB) && (highLimitR == true)) {
                 // we have a tilt to the north
-                rCount++;
+              ;
 
                 oneButton(2);
                 highLimitR = false;

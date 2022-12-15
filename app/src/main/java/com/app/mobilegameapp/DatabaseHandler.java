@@ -70,6 +70,8 @@ import com.app.mobilegameapp.HIScore;
             onCreate(db);
         }
 
+
+
         // code to add the new hiScore
         void addHiScore(HIScore hiScore) {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -92,8 +94,8 @@ import com.app.mobilegameapp.HIScore;
 
             Cursor cursor = db.query(TABLE_HI_SCORES, new String[]{
                             KEY_SCORE_ID,
-                            KEY_GAME_DATE,
                             KEY_MODE,
+                            KEY_GAME_DATE,
                             KEY_PLAYER_NAME,
                             KEY_SCORE},
                     KEY_SCORE_ID + "=?",
@@ -102,6 +104,7 @@ import com.app.mobilegameapp.HIScore;
                 cursor.moveToFirst();
 
             HIScore hiScore = new  HIScore(Integer.parseInt(
+
                     cursor.getString(0)),
                     cursor.getString(1),
                     cursor.getString(2),
@@ -188,6 +191,8 @@ import com.app.mobilegameapp.HIScore;
             // return hi score list
             return hiScoreList;
         }
+
+
 
     }
 

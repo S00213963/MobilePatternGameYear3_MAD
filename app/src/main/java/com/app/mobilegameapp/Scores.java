@@ -8,35 +8,40 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class Scores extends AppCompatActivity {
 TextView tv;
     StringBuilder sb;
-    ListView list;
+    ListView listView;
     String countryList[] = {"India", "China", "australia", "Portugle", "America", "NewZealand"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scores);
+        getSupportActionBar().hide();
 
+        listView = findViewById(R.id.listView);
 
 
 
         DatabaseHandler db = new DatabaseHandler(this);
         db.emptyHiScores();     // empty table if required
-        tv = findViewById(R.id.tv);
+      //  tv = findViewById(R.id.tv);
 
         // Inserting hi scores
         Log.i("Insert: ", "Inserting ..");
-        db.addHiScore(new HIScore("20 OCT 2020", "Hard", "Frodo", 12));
-        db.addHiScore(new HIScore("28 OCT 2020", "Hard", "Dobby", 16));
-        db.addHiScore(new HIScore("20 NOV 2020", "Hard","DarthV", 20));
-        db.addHiScore(new HIScore("20 NOV 2020","Hard", "Bob", 18));
-        db.addHiScore(new HIScore("22 NOV 2020", "Easy","Gemma", 22));
-        db.addHiScore(new HIScore("30 NOV 2020", "Easy","Joe", 30));
-        db.addHiScore(new HIScore("01 DEC 2020", "Easy","DarthV", 22));
-        db.addHiScore(new HIScore("02 DEC 2020", "Easy","Gandalf", 132));
+        db.addHiScore(new HIScore("Hard", "20 OCT 2020",  "Frodo", 12));
+        db.addHiScore(new HIScore("Hard","28 OCT 2020",  "Dobby", 16));
+        db.addHiScore(new HIScore("Hard","20 NOV 2020", "DarthV", 20));
+        db.addHiScore(new HIScore("Hard","20 NOV 2020", "Bob", 18));
+        db.addHiScore(new HIScore("Easy" ,"22 NOV 2020" ,"Gemma", 22));
+        db.addHiScore(new HIScore("Easy","30 NOV 2020", "Joe", 30));
+        db.addHiScore(new HIScore("Easy","01 DEC 2020", "DarthV", 22));
+        db.addHiScore(new HIScore("Easy","02 DEC 2020", "Gandalf", 132));
         List<HIScore> hiScores = db.getAllHiScores();
 
 
@@ -48,21 +53,31 @@ TextView tv;
         // Reading all scores
         Log.i("Reading: ", "Reading all scores..");
 
+        List<String> scoresStr;
+        scoresStr = new ArrayList<>();
 
-
+        int j = 0;
         for (HIScore hs : hiScores) {
             String log =
                     "Id: " + hs.getScore_id() +
+                            ", mode!!!!!: " + hs.getMode() +
                             ", Date: " + hs.getGame_date() +
+
                             " , Player: " + hs.getPlayer_name() +
                             " , Score: " + hs.getScore();
 
+            scoresStr.add(j++ + " : "  +
+                    hs.getPlayer_name() + "\t" +
+                    hs.getScore());
+
+            //adapter.add(newUser);
             // Writing HiScore to log
             Log.i("Score: ", log);
 
 
 
         }
+
 
 
         Log.i("divider", "====================");
@@ -111,12 +126,20 @@ TextView tv;
                             " , Player: " + hs.getPlayer_name() +
                             " , Score: " + hs.getScore();
 
+
+
+
             // Writing HiScore to log
             Log.i("Score: ", log);
            // sb.append(log + ", ");
         }
 
-       // tv.setText(sb);
+//        ArrayAdapter<HIScore> itemsAdapter =
+//                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, scoresStr[0]);
+//        listView.setAdapter(itemsAdapter);
+
+        TextView t = findViewById(R.id.tv);
+        t.setText(scoresStr.toString());
 
     }
     }
