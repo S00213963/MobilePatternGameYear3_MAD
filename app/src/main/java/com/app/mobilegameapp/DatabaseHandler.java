@@ -3,8 +3,10 @@ package com.app.mobilegameapp;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.SimpleCursorAdapter;
 
 import java.security.Key;
 import java.util.ArrayList;
@@ -25,9 +27,16 @@ import com.app.mobilegameapp.HIScore;
         private static final String KEY_PLAYER_NAME = "player_name";
         private static final String KEY_GAME_DATE = "game_date";
         private static final String KEY_SCORE = "score";
+    private SQLiteDatabase database;
+    private MySQLiteHelper dbHelper;
+    private String[] allColumns = { MySQLiteHelper.COLUMN_ID,
+            MySQLiteHelper.COLUMN_COMMENT };
 
 
-        /*
+
+
+
+    /*
          * Constructor
          */
         public DatabaseHandler(Context context) {
@@ -69,6 +78,7 @@ import com.app.mobilegameapp.HIScore;
             // Create tables again
             onCreate(db);
         }
+
 
 
 
@@ -115,6 +125,8 @@ import com.app.mobilegameapp.HIScore;
             return hiScore;
         }
 
+
+
         // code to get all hiScores in a list view
         public List<HIScore> getAllHiScores() {
             List<HIScore> hiScoreList = new ArrayList<HIScore>();
@@ -141,6 +153,27 @@ import com.app.mobilegameapp.HIScore;
             // return hiScore list
             return hiScoreList;
         }
+
+    public List<HIScore> getAllComments() {
+       // List<Comment> comments = new ArrayList<Comment>();
+        List<HIScore> hiScoreList = new ArrayList<HIScore>();
+
+        Cursor cursor = database.query(MySQLiteHelper.TABLE_COMMENTS,
+                allColumns, null, null, null, null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            HIScore hiScore = new  HIScore();
+            hiScore.setScore_id(Integer.parseInt(cursor.getString(0)));
+
+            // Adding hi score to list
+            hiScoreList.add(hiScore);
+            cursor.moveToNext();
+        }
+        // make sure to close the cursor
+        cursor.close();
+        return hiScoreList;
+    }
 
         // code to update the single hiScore
         public int updateHiScore(HIScore hiScore) {
@@ -192,8 +225,15 @@ import com.app.mobilegameapp.HIScore;
             return hiScoreList;
         }
 
+    public void open() throws SQLException {
+        database = dbHelper.getWritableDatabase();
+    }
 
+    public void close() {
+        dbHelper.close();
+    }
 
     }
+
 
 

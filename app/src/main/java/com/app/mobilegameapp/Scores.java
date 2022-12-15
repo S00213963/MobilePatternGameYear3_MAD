@@ -42,12 +42,16 @@ TextView tv;
         db.addHiScore(new HIScore("Easy","30 NOV 2020", "Joe", 30));
         db.addHiScore(new HIScore("Easy","01 DEC 2020", "DarthV", 22));
         db.addHiScore(new HIScore("Easy","02 DEC 2020", "Gandalf", 132));
+
+
         List<HIScore> hiScores = db.getAllHiScores();
 
 
-//        list = findViewById(R.id.listView);
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_scores, R.id.textView, countryList);
-//        list.setAdapter(arrayAdapter);
+        listView = findViewById(R.id.listView);
+        ArrayAdapter<HIScore> arrayAdapter = new ArrayAdapter<HIScore>(this,
+                android.R.layout.simple_list_item_1,
+                hiScores);
+        listView.setAdapter(arrayAdapter);
 
 
         // Reading all scores
@@ -124,6 +128,7 @@ TextView tv;
                     "Id: " + hs.getScore_id() +
                             ", Date: " + hs.getGame_date() +
                             " , Player: " + hs.getPlayer_name() +
+                            " , mode: " + hs.getMode() +
                             " , Score: " + hs.getScore();
 
 
@@ -137,9 +142,9 @@ TextView tv;
 //        ArrayAdapter<HIScore> itemsAdapter =
 //                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, scoresStr[0]);
 //        listView.setAdapter(itemsAdapter);
-
-        TextView t = findViewById(R.id.tv);
-        t.setText(scoresStr.toString());
+//
+//        TextView t = findViewById(R.id.tv);
+//        t.setText(scoresStr.toString());
 
     }
     }

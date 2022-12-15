@@ -375,7 +375,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     {
         mp = MediaPlayer.create(this, R.raw.gameover);
         mp.start();
-        Intent i = (new Intent(Game.this, Scores.class));
+        Intent i = (new Intent(Game.this, scoreDB.class));
         startActivity(i);
 
     }
