@@ -107,6 +107,8 @@ public class MainActivity extends Activity  implements SensorEventListener,
             i.putExtra("mode", sel );
             i.putExtra("modeNum", modeNum.toString());
             startActivity(i);
+
+            // code to call ball moving screen, first test game, not in use anymore.
 //        animatedView = new AnimatedView(this);
 //        setContentView(animatedView);
 

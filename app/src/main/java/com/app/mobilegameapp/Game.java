@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -57,7 +58,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
 
 
-    TextView tvy, gameText;
+    TextView tvy;
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
@@ -100,7 +101,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             public void onFinish() {
 
 
-                gameText.setText(sb);
+
+
                 for (int i = 0; i< arrayIndex; i++)
                     Log.d("game sequence", String.valueOf(gameSequence.get(i)));
 
@@ -146,7 +148,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         bGreen = findViewById(R.id.btnGreen);
         play = findViewById(R.id.btnPlay);
 
-        gameText = findViewById(R.id.tvGame);
+
         tvRound = findViewById(R.id.TvRound);
         tvRoundMess = findViewById(R.id.tvRound);
         tvPoints = findViewById(R.id.tvPoints);
@@ -181,17 +183,17 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             if (hardMode == true)
             {
                 n = getRandom(sequenceCount);
-                sb.append(String.valueOf(n) + ", ");
+
             }
 
             else
             {
                 if (firstRound)
                 {
-                    for (int i = 0; i < 2; i++)
+                    for (int i = 0; i < 2; i++) // selects two colors
                     {
                         gameSequence.add(getRandom(sequenceCount));
-                        sb.append(String.valueOf(n) + ", ");
+
 
                     }
                 }
@@ -202,15 +204,20 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     {
                         gameSequence.add(getRandom(sequenceCount));
                         haveAddedNew = true;
-                        sb.append(String.valueOf(n) + ", ");
+
                     }
 
                 }
 
 
                 n = gameSequence.get(listCounter);
+
+                DisplayColors(n);
                 listCounter++;
+                tvRoundMess.setText(sb);
             }
+
+
 
 
             switch (n) {
@@ -290,8 +297,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                         break;
                 }
 
-
-
                 if (guessCount == CPUSets)
                 {
                     timer.cancel();
@@ -319,7 +324,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
                     }
 
-
                     listCounter = 0; //resets list count
 
                     if(hardMode == true)
@@ -329,14 +333,30 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     }
 
                 }
-
             }
-
-
 
         }
     }
+    public void DisplayColors(Integer n)
+    {
+        switch (n)  //prints sequence to screen
+        {
+            case 1:
+                sb.append("Red, ");
+                break;
+            case 2:
+                sb.append("Blue, ");
+                break;
+            case 3:
+                sb.append("Purple, ");
+                break;
+            case 4:
+                sb.append("Green, ");
+                break;
 
+        }
+
+    }
     public int CalPoints()
     {
 
@@ -373,9 +393,18 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     }
     public void GameOver()
     {
+        DatabaseHandler db = new DatabaseHandler(this);
+        String currentTime = Calendar.getInstance().getTime().toString();
+        db.addHiScore(new HIScore(currentTime, name, Integer.parseInt(String.valueOf(points)))); // add new high score
+
+
         mp = MediaPlayer.create(this, R.raw.gameover);
         mp.start();
+        String p = Integer.toString(points);
         Intent i = (new Intent(Game.this, scoreDB.class));
+        i.putExtra("name", name);
+        i.putExtra("score", p);
+
         startActivity(i);
 
     }

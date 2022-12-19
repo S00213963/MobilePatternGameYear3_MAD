@@ -9,8 +9,8 @@ public class HIScore {
      *      score INTEGER NOT NULL);
      */
 
+
     int  score_id;          // primary score
-    String mode;
     String game_date;       // date in 02 DEC 2020
     String player_name;     // JOE
     int score;              // score - should be even
@@ -18,10 +18,9 @@ public class HIScore {
     /*
      * Constructors
      */
-    public HIScore( String mode, String game_date, String player_name, int score) {
-
+    public HIScore(int score_id, String game_date, String player_name, int score) {
+        this.score_id = score_id;
         this.game_date = game_date;
-        this.mode = mode;
         this.player_name = player_name;
         this.score = score;
     }
@@ -32,10 +31,8 @@ public class HIScore {
     /*
      * Getter and setter methods
      */
-    public HIScore(int score_id, String game_date, String mode, String player_name, int score) {
-        this.score_id = score_id;
+    public HIScore(String game_date, String player_name, int score) {
         this.game_date = game_date;
-        this.mode = mode;
         this.player_name = player_name;
         this.score = score;
     }
@@ -46,14 +43,6 @@ public class HIScore {
 
     public void setScore_id(int score_id) {
         this.score_id = score_id;
-    }
-
-    public String getMode() {
-        return mode;
-    }
-
-    public void setMode(String mode) {
-        this.mode = mode;
     }
 
     public String getGame_date() {
